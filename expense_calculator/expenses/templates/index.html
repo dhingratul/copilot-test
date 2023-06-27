@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+    <script>
+        const apiUri = '/api/expenses/';
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        function renderExpense(expense) {
+        // create tr with td for name , amount and timestamp
+        // use template strings
+        // make timestamp human readable
+        const timestamp = new Date(expense.timestamp);
+        const tr = document.createElement('tr');
+        const nameTd = document.createElement('td');
+        const amountTd = document.createElement('td');
+        tr.innerHTML = `
+            <td>${expense.name}</td>
+            <td>${expense.amount}</td>
+            <td>${expense.date}</td>
+            <td><button class="delete" data-pk="${expense.pk}">Delete</button></td>
+        `;
+        }
+        function refreshTable() {
+
+        }
+        function getExpenses() {
+            fetch(apiUri, {
+                method: 'GET',
+                headers: headers
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    data.forEach(expense => {
+                        renderExpense(expense);
+                    });
+                })
+                .catch(error => console.error(error));
+
+        }
+        function postExpense() {
+            const expense = {
+                name: document.querySelector("input[name='name']").value,
+                amount: document.querySelector("input[name='amount']").value,
+                date: document.querySelector("input[name='date']").value
+            };
+            fetch(apiUri, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(expense)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    renderExpense(data);
+                })
+                .catch(error => console.error(error));
+
+        }
+        function deleteExpense(pk) {
+            fetch(apiUri + pk, {
+                method: 'DELETE',
+                headers: headers
+            })
+                .then(response => refreshTable())
+                .catch(error => console.error(error));
+
+        }
+        // const table = document.createElement('table');
+        // document.body.appendChild(table);
+        // refreshTable();
+        // document.querySelector("input[type='submit']").addEventListener('click', postExpense);
+        deleteExpense(1);
+        getExpenses();
+        postExpense();
+    </script>
+</body>
+
+</html>
